@@ -5,10 +5,15 @@ Ten minutes from clone to your first note. You do not need to understand the arc
 
 ## Install
 
-You need **Python 3.11+** and **Obsidian**. Nothing else — no plugins, no pip install.
+You need **Python 3.11+** and a **recent Obsidian** (one with the core Bases plugin — 1.9 or
+newer). Nothing else: no community plugins, no `pip install`.
+
+Two notes on that. macOS ships Python 3.9, so `brew install python` may be needed — setup tells you
+if so. And if your Obsidian predates Bases, everything still works except the `bases/*.base`
+dashboards; `python3 scripts/vault.py status` shows you the same facts in the terminal.
 
 ```
-git clone <this repo> my-vault
+git clone https://github.com/txaty/lifeos.git my-vault
 cd my-vault
 python3 setup.py
 ```

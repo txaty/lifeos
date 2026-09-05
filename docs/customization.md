@@ -200,7 +200,7 @@ when the dependency is missing, so nothing you build on top of it can break by r
 ## Staying updateable
 
 ```
-git remote add upstream <framework repo>
+git remote add upstream https://github.com/txaty/lifeos.git
 git fetch upstream && git log --oneline HEAD..upstream/main -- scripts/ docs/
 git cherry-pick <commit>
 ```

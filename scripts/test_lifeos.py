@@ -141,6 +141,89 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(set(source.enums["source_type"]), set(source.variants))
 
 
+class TestExtensibilityPromise(unittest.TestCase):
+    """The architectural promise: routine customization is config, never code.
+
+    README.md and CONTRIBUTING.md both say so, so it is asserted here rather than
+    left as a claim someone has to take on trust.
+    """
+
+    def _config_with_extra_type(self) -> Config:
+        data = dict(CFG.raw)
+        data["paths"] = dict(data["paths"])
+        data["paths"]["content_dirs"] = list(data["paths"]["content_dirs"]) + ["prompts"]
+        data["types"] = dict(data["types"])
+        data["types"]["prompt"] = {
+            "folder": "prompts",
+            "filename": "title",
+            "template": "prompt.md",
+            "required": ["type", "title", "created", "updated", "status", "use_case", "tags"],
+            "optional": ["domain", "aliases"],
+            "summary": "A prompt worth keeping.",
+            "enums": {"status": ["draft", "active", "deprecated"]},
+        }
+        return Config(data, Path("test.toml"))
+
+    def test_a_new_note_type_is_valid_config(self):
+        cfg = self._config_with_extra_type()          # raises ConfigError if not
+        self.assertIn("prompt", cfg.types)
+        self.assertEqual(cfg.folder_to_type["prompts"], "prompt")
+
+    def test_the_linter_enforces_the_new_type_with_no_code_change(self):
+        cfg = self._config_with_extra_type()
+        good = ('---\ntype: prompt\ntitle: "T"\ncreated: "2026-01-01"\n'
+                'updated: "2026-01-01"\nstatus: active\nuse_case: "x"\ntags: []\n---\n')
+        path = lifeos_config.VAULT / "prompts" / "T.md"
+        self.assertEqual(linter.lint_file(path, cfg, text=good), [])
+
+        bad = good.replace("status: active", "status: nonsense")
+        self.assertTrue(any("not in" in i.msg for i in linter.lint_file(path, cfg, text=bad)))
+
+        missing = good.replace('use_case: "x"\n', "")
+        self.assertTrue(any("use_case" in i.msg for i in linter.lint_file(path, cfg, text=missing)))
+
+    def test_the_write_guard_follows_the_config(self):
+        """Adding a content dir must grant agents access to it without editing the guard."""
+        cfg = self._config_with_extra_type()
+        self.assertIn("prompts", cfg.content_dirs)
+
+    def test_the_schema_doc_documents_the_new_type(self):
+        import gen_schema_doc
+        rendered = gen_schema_doc.render(self._config_with_extra_type())
+        self.assertIn("`prompt`", rendered)
+        self.assertIn("prompts/", rendered)
+
+
+class TestPublicDocs(unittest.TestCase):
+    """Claims made in the public-facing docs, asserted so they cannot rot."""
+
+    README = lifeos_config.VAULT / "README.md"
+
+    def test_readme_snippet_matches_the_real_example_file(self):
+        """README shows a project note and says CI keeps it from drifting. This is CI."""
+        import re
+        m = re.search(r"```markdown\n(.*?)```", self.README.read_text(), re.DOTALL)
+        self.assertIsNotNone(m, "README no longer contains a markdown example block")
+        example = (lifeos_config.VAULT / "examples" / "projects"
+                   / "Run a Half Marathon.md").read_text()
+        for line in (l for l in m.group(1).rstrip().split("\n") if l.strip()):
+            self.assertIn(line, example,
+                          f"README snippet line is not in the example file: {line!r}")
+
+    def test_readme_links_resolve_to_files_that_exist(self):
+        import re
+        broken = []
+        for target in re.findall(r"\]\((?!https?://)([^)#]+)", self.README.read_text()):
+            if not (lifeos_config.VAULT / target).exists():
+                broken.append(target)
+        self.assertEqual(broken, [])
+
+    def test_promised_files_exist(self):
+        for name in ("LICENSE", "CONTRIBUTING.md", "AGENTS.md", "CLAUDE.md",
+                     "config/lifeos.toml", ".github/workflows/vault-check.yml"):
+            self.assertTrue((lifeos_config.VAULT / name).exists(), name)
+
+
 # ------------------------------------------------------------------ linter
 
 class TestLinter(unittest.TestCase):
