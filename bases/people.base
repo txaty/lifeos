@@ -1,0 +1,36 @@
+# People and the conversations you have had with them.
+formulas:
+  last_seen: if(date, (today() - date(date)).days, "")
+properties:
+  formula.last_seen:
+    displayName: Days Ago
+  relation:
+    displayName: Relation
+  org:
+    displayName: Org
+  people:
+    displayName: People
+views:
+  - type: table
+    name: People
+    filters:
+      and:
+        - type == "person"
+    order:
+      - file.name
+      - relation
+      - org
+      - projects
+      - updated
+  - type: table
+    name: Meetings
+    filters:
+      and:
+        - type == "meeting"
+    order:
+      - file.name
+      - date
+      - formula.last_seen
+      - people
+      - projects
+    limit: 50

@@ -1,0 +1,65 @@
+# Compiled knowledge and the sources behind it.
+formulas:
+  age: if(updated, (today() - date(updated)).days, "")
+  cited: if(sources, "yes", "no")
+properties:
+  formula.age:
+    displayName: Days Since Update
+  formula.cited:
+    displayName: Cited
+  domain:
+    displayName: Domain
+  sources:
+    displayName: Sources
+  last_corroborated:
+    displayName: Last Confirmed
+views:
+  - type: table
+    name: Wiki by domain
+    filters:
+      and:
+        - type == "wiki"
+        - domain != "meta"
+    groupBy:
+      property: domain
+      direction: ASC
+    order:
+      - file.name
+      - updated
+      - formula.age
+      - sources
+  - type: table
+    name: Needs review
+    filters:
+      and:
+        - type == "wiki"
+        - domain != "meta"
+        - updated
+        - (today() - date(updated)).days > 365
+    order:
+      - file.name
+      - domain
+      - updated
+      - formula.age
+  - type: table
+    name: Disputed
+    filters:
+      and:
+        - type == "wiki"
+        - disputed == true
+    order:
+      - file.name
+      - domain
+      - updated
+  - type: table
+    name: Recent sources
+    filters:
+      and:
+        - type == "source"
+    order:
+      - file.name
+      - source_type
+      - author
+      - date
+      - projects
+    limit: 50

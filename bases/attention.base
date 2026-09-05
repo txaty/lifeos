@@ -1,0 +1,69 @@
+# What needs you. The same facts as `python3 scripts/vault.py status`, for humans.
+# Open in Obsidian; this is a live query, not a generated file.
+formulas:
+  days_since_update: if(updated, (today() - date(updated)).days, "")
+  days_old: if(date, (today() - date(date)).days, if(file.ctime, (today() - file.ctime.date()).days, ""))
+  flag: if(type == "project" && status == "active" && updated && (today() - date(updated)).days > 30, "stale", if(type == "project" && status == "done", "archive me", if(type == "project" && status == "idea" && updated && (today() - date(updated)).days > 90, "old idea", "")))
+properties:
+  formula.days_since_update:
+    displayName: Days Since Update
+  formula.days_old:
+    displayName: Age
+  formula.flag:
+    displayName: Flag
+  status:
+    displayName: Status
+  question:
+    displayName: Question
+  outcome:
+    displayName: Outcome
+views:
+  - type: table
+    name: Inbox
+    filters:
+      and:
+        - file.inFolder("inbox")
+    order:
+      - file.name
+      - formula.days_old
+      - file.mtime
+  - type: table
+    name: Projects
+    filters:
+      and:
+        - type == "project"
+        - status != "archived"
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - formula.flag
+      - file.name
+      - domain
+      - question
+      - updated
+      - formula.days_since_update
+  - type: table
+    name: Decisions to review
+    filters:
+      and:
+        - output_type == "decision"
+        - outcome == "unknown"
+        - status != "superseded"
+    order:
+      - file.name
+      - status
+      - stakes
+      - date
+      - formula.days_old
+  - type: table
+    name: Areas
+    filters:
+      and:
+        - type == "area"
+    order:
+      - file.name
+      - status
+      - domain
+      - updated
+      - formula.days_since_update

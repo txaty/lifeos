@@ -1,0 +1,73 @@
+# Every project, by status. The lifecycle is idea -> active -> paused -> done -> archived.
+filters:
+  and:
+    - type == "project"
+formulas:
+  days_since_update: if(updated, (today() - date(updated)).days, "")
+properties:
+  formula.days_since_update:
+    displayName: Days Since Update
+  status:
+    displayName: Status
+  domain:
+    displayName: Domain
+  kind:
+    displayName: Kind
+  question:
+    displayName: Question
+  areas:
+    displayName: Areas
+  due:
+    displayName: Due
+views:
+  - type: table
+    name: Active
+    filters:
+      and:
+        - status == "active"
+    order:
+      - file.name
+      - domain
+      - kind
+      - question
+      - due
+      - updated
+      - formula.days_since_update
+  - type: table
+    name: Ideas and paused
+    filters:
+      or:
+        - status == "idea"
+        - status == "paused"
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - domain
+      - question
+      - updated
+  - type: table
+    name: Finished
+    filters:
+      or:
+        - status == "done"
+        - status == "archived"
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - domain
+      - updated
+  - type: table
+    name: All
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - domain
+      - kind
+      - areas
+      - updated

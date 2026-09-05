@@ -1,0 +1,29 @@
+# OS and editor noise
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+*.tmp
+
+# Per-machine and per-person state — never shared
+CLAUDE.local.md
+.claude/settings.local.json
+.env
+
+# Obsidian per-device state. The config and themes ARE tracked, so a clone opens
+# with the right plugins and folders; only window layout is per-device.
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspace.json.bak
+
+# Rebuildable caches
+.index/
+.venv/
+venv/
+
+# Secrets have no business in a notes repo. If you find yourself wanting to add an
+# exception here, put the file outside the vault instead.
+*.pem
+*.key
+auth.json
+credentials.json

@@ -1,0 +1,29 @@
+#!/bin/sh
+# Validate notes before they enter history.
+#
+# Two stages: a fast frontmatter lint of just the staged notes, then the vault-wide
+# structural check (schema, naming, generated-index freshness). Broken links only
+# warn — you will often link a page before you write it, and that is fine.
+#
+# Installed by `python3 setup.py`, or by hand:
+#     git config core.hooksPath .githooks
+#
+# To bypass once (and you should have a reason):  git commit --no-verify
+set -eu
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+PYTHON=${LIFEOS_PYTHON:-python3}
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.md' || true)
+if [ -n "$STAGED" ]; then
+  printf '%s\n' "$STAGED" | "$PYTHON" "$REPO_ROOT/scripts/lint_frontmatter.py" --stdin
+fi
+
+# Output is captured so a passing check stays quiet; a failing one prints everything.
+if ! OUT=$("$PYTHON" "$REPO_ROOT/scripts/vault.py" check 2>&1); then
+  printf '%s\n' "$OUT"
+  echo
+  echo "pre-commit: vault check failed."
+  echo "  Fix the errors above, or run: $PYTHON scripts/vault.py index"
+  exit 1
+fi

@@ -1,0 +1,15 @@
+# LifeOS core needs NOTHING here. Every script in scripts/ is Python 3.11+ stdlib,
+# so a fresh clone works with no install step at all.
+#
+# This file is only for the optional dense-retrieval upgrade, which improves
+# `scripts/retrieve.py` from lexical BM25 to hybrid lexical + semantic search.
+# Without it, retrieval still works — it just matches words rather than meaning.
+#
+#     python3 -m venv .venv && . .venv/bin/activate
+#     pip install -r requirements.txt
+#     # then set dense_enabled = true in config/lifeos.toml
+#
+# Keep the index outside any cloud-synced folder: export LIFEOS_INDEX_DIR=~/.cache/lifeos
+
+sentence-transformers>=3.0
+numpy>=1.26

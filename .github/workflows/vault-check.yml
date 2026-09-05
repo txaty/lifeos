@@ -1,0 +1,34 @@
+name: vault check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # the minimum LifeOS supports; CI runs the floor
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s scripts -p "test_*.py" -v
+
+      - name: Config is valid
+        run: python3 scripts/lifeos_config.py
+
+      - name: Generated files are current
+        run: |
+          python3 scripts/vault.py docs --check
+          python3 scripts/vault.py index --check
+
+      - name: Vault check
+        run: python3 scripts/vault.py check
+
+      - name: Bootstrap from scratch still works
+        run: |
+          python3 setup.py --check --defaults
