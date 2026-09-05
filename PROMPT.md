@@ -1,7 +1,7 @@
 # LifeOS Distillation Prompt
 
-> Working note: this file contains a local filesystem path to a private vault. If this repo
-> becomes public, keep the prompt but treat the path as the only local detail worth redacting.
+> Working note: the two filesystem paths this prompt originally carried have been redacted, since
+> the resulting repository is public. Everything else is the prompt as written.
 
 ---
 
@@ -16,9 +16,9 @@ workflows, conventions, automation, and operating principles into a clean, reusa
 that another person can safely bootstrap and adapt.
 
 - **Source vault (read-only reference):**
-  `/Users/tommytian/Library/Mobile Documents/iCloud~md~obsidian/Documents/second-brain`
+  `<path to the private source vault>`
 - **Target repository (where you build):**
-  `/Users/tommytian/ghq/github.com/txaty/lifeos` — currently an empty git repo on `main` with no commits.
+  `<path to this repository>` — an empty git repo on `main` with no commits.
 
 The goal is **not** to clone my vault. The goal is to extract the underlying system while removing all
 personal content and installation-specific noise.
@@ -423,7 +423,7 @@ by the user-facing prompt library concept.
 
 * **Never modify the source vault.** Treat it as read-only. It lives in iCloud Drive, so any write
   propagates to my other devices immediately. No deletes, renames, migrations, or rewrites.
-* Build everything in `/Users/tommytian/ghq/github.com/txaty/lifeos`.
+* Build everything in this repository.
 * Never open `auth.json`.
 * The framework's own scripts should stay Python stdlib where the source does, with heavier
   dependencies (embeddings) isolated and optional.
